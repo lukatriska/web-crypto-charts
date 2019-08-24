@@ -1,0 +1,8 @@
+.main-svg {
+    margin: 200px;
+}
+
+.overlay {
+    fill: none;
+    pointer-events: all
+}

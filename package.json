@@ -2,5 +2,6 @@
   "name": "web_talon",
   "version": "1.0.0",
   "dependencies": {
+    "d3": "^5.11.0"
   }
 }
