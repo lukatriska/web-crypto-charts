@@ -1,12 +1,12 @@
 let margin = {top: 10, right: 50, bottom: 100, left: 50},
   width = 760,
-  height = 500;
+  height = 400;
 
 const svg = d3.select(".main-container")
   .append("svg")
   .attr("class", "main-svg")
-  .attr("width", width)
-  .attr("height", height)
+  .attr("width", width + margin.right + margin.left)
+  .attr("height", height + margin.top + margin.bottom)
   .style("cursor", "crosshair")
   .append("g")
   .attr("transform",
@@ -15,24 +15,29 @@ const svg = d3.select(".main-container")
 d3.csv("https://api.coindesk.com/v1/bpi/historical/close.csv",
 
   d => {
-    return {date: d3.timeParse("%Y-%m-%d")(d.Date), value: d.Close}
+    return {date: d3.timeParse("%Y-%m-%d")(d.Date), value: Math.floor(d.Close)}
   },
 
   data => {
+
+    data.splice(data.length - 3, 3);
 
 
     let x = d3.scaleTime()
       .domain(d3.extent(data, d => d.date))
       .range([0, width]);
     svg.append("g")
-      .attr("transform", 'translate(0,' + (height - margin.bottom + 70) + ')')
-      .call(d3.axisBottom(x));
-
+      .attr("transform", 'translate(0,' + height + ')')
+      .call(d3.axisBottom(x))
+      .classed('axis', true)
+      .selectAll("text")
+      .attr("transform", "translate(-10,10)rotate(-45)");
 
     let y = d3.scaleLinear()
       .domain([0, d3.max(data, d => +d.value)])
       .range([height, 0]);
     svg.append("g")
+      .classed('axis', true)
       .call(d3.axisLeft(y));
 
     svg.append("path")
@@ -72,8 +77,8 @@ d3.csv("https://api.coindesk.com/v1/bpi/historical/close.csv",
       .attr('class', 'overlay')
       .attr('width', width)
       .attr('height', height)
-      // .on('mouseover', () => focus.style('display', null))
-      // .on('mouseout', () => focus.style('display', 'none'))
+      .on('mouseover', () => focus.style('display', null))
+      .on('mouseout', () => focus.style('display', 'none'))
       .on('mousemove', mouseAction());
 
     function mouseAction() {
@@ -93,14 +98,13 @@ d3.csv("https://api.coindesk.com/v1/bpi/historical/close.csv",
       return value;
     }
 
+    console.log(data);
+
     function updateMousePosition(target) {
       let mouse = d3.mouse(target);
 
-      const x0 = Math.floor(bound(mouse[0], 0, width));
-      const i = Math.floor((x0 / 760) * data.length) - 1;
-      const d0 = data[i - 1], d1 = data[i];
-
-      const d = x0 - d0.date > d1.date - x0 ? d1 : d0;
+      // choose day using the x coordinate of the cursor
+      const d = data[Math.floor((Math.floor(bound(mouse[0], 0, width)) / 761) * data.length)];
 
       focus.attr('transform', `translate(${x(d.date)}, ${y(d.value)})`);
       focus.select('line.x')
@@ -110,8 +114,10 @@ d3.csv("https://api.coindesk.com/v1/bpi/historical/close.csv",
         .attr('y2', height - y(d.value));
 
       if (d.date) {
-        d3.select(".chart-info")
-          .text(d.date + ": $" + d.value)
+        d3.select(".chart-info__date")
+          .text(`Date: ${d.date.getDate()} ${d.date.toLocaleString('default', {month: 'long'})} ${d.date.getFullYear()}`);
+        d3.select(".chart-info__price")
+          .text(`Price: $${d.value}`)
       }
 
     }

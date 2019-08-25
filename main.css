@@ -1,3 +1,8 @@
+body {
+    font-family: Oxygen, sans-serif;
+    color: #64b5f6;
+}
+
 .main-svg {
     margin: 0 200px 200px 200px;
 }
@@ -6,7 +11,6 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-top: 100px;
 }
 
 .price-line {
@@ -24,6 +28,17 @@
 
 .chart-info {
     height: 30px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    margin-bottom: 20px;
+    font-size: 18px;
+}
+
+.axis {
+    text-anchor: end;
+    font-family: Oxygen, sans-serif;
+    color: #64b5f6;
 }
 
 .overlay {
