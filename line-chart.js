@@ -1,4 +1,4 @@
-let margin = {top: 10, right: 0, bottom: 0, left: 0},
+let margin = {top: 10, right: 50, bottom: 100, left: 50},
   width = 760,
   height = 500;
 
@@ -24,10 +24,16 @@ d3.csv("https://api.coindesk.com/v1/bpi/historical/close.csv",
     let x = d3.scaleTime()
       .domain(d3.extent(data, d => d.date))
       .range([0, width]);
+    svg.append("g")
+      .attr("transform", 'translate(0,' + (height - margin.bottom + 70) + ')')
+      .call(d3.axisBottom(x));
+
 
     let y = d3.scaleLinear()
       .domain([0, d3.max(data, d => +d.value)])
       .range([height, 0]);
+    svg.append("g")
+      .call(d3.axisLeft(y));
 
     svg.append("path")
       .datum(data)
@@ -97,8 +103,8 @@ d3.csv("https://api.coindesk.com/v1/bpi/historical/close.csv",
       const d = x0 - d0.date > d1.date - x0 ? d1 : d0;
 
       focus.attr('transform', `translate(${x(d.date)}, ${y(d.value)})`);
-      // focus.select('line.x')
-      //   .attr('x2', -x(d.date));
+      focus.select('line.x')
+        .attr('x2', -x(d.date));
 
       focus.select('line.y')
         .attr('y2', height - y(d.value));
