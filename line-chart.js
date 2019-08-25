@@ -40,16 +40,22 @@ d3.csv("https://api.coindesk.com/v1/bpi/historical/close.csv",
       );
 
     const focus = svg.append('g')
-      .attr('class', 'focus')
-      .style('display', 'none');
+      .attr('class', 'focus');
 
     focus.append('circle')
-      .attr('r', 4.5);
+      .attr('r', 4.5)
+      .classed('price-circle', true);
 
     focus.append('line')
+      .attr('x1', 0)
+      .attr('y1', 0)
+      .attr('y2', 0)
       .classed('price-line x', true);
 
     focus.append('line')
+      .attr('x1', 0)
+      .attr('x2', 0)
+      .attr('y1', 4.5)
       .classed('price-line y', true);
 
     focus.append('text')
@@ -60,8 +66,8 @@ d3.csv("https://api.coindesk.com/v1/bpi/historical/close.csv",
       .attr('class', 'overlay')
       .attr('width', width)
       .attr('height', height)
-      .on('mouseover', () => focus.style('display', null))
-      .on('mouseout', () => focus.style('display', 'none'))
+      // .on('mouseover', () => focus.style('display', null))
+      // .on('mouseout', () => focus.style('display', 'none'))
       .on('mousemove', mouseAction());
 
     function mouseAction() {
@@ -81,37 +87,26 @@ d3.csv("https://api.coindesk.com/v1/bpi/historical/close.csv",
       return value;
     }
 
-
-    function getMousePosition(mouse) {
-      // return `(${Math.floor(bound(mouse[0], 0, width))}, ${Math.floor(bound(mouse[1], 0, height))})`;
-      return Math.floor(bound(mouse[0], 0, width));
-    }
-
     function updateMousePosition(target) {
       let mouse = d3.mouse(target);
 
-      const x0 = getMousePosition(mouse);
+      const x0 = Math.floor(bound(mouse[0], 0, width));
       const i = Math.floor((x0 / 760) * data.length) - 1;
       const d0 = data[i - 1], d1 = data[i];
 
       const d = x0 - d0.date > d1.date - x0 ? d1 : d0;
 
       focus.attr('transform', `translate(${x(d.date)}, ${y(d.value)})`);
-      focus.select('line.x')
-        .attr('x1', 0)
-        .attr('x2', -x(d.date))
-        .attr('y1', 0)
-        .attr('y2', 0);
+      // focus.select('line.x')
+      //   .attr('x2', -x(d.date));
 
       focus.select('line.y')
-        .attr('x1', 0)
-        .attr('x2', 0)
-        .attr('y1', 0)
         .attr('y2', height - y(d.value));
 
-      d3.select(".chart-info")
-        .text(d.value)
-
+      if (d.date) {
+        d3.select(".chart-info")
+          .text(d.date + ": $" + d.value)
+      }
 
     }
 
