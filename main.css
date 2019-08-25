@@ -1,5 +1,23 @@
 .main-svg {
-    margin: 200px;
+    margin: 0 200px 200px 200px;
+}
+
+.main-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 100px;
+}
+
+.price-line {
+    fill: none;
+    stroke: black;
+    stroke-width: 1.5px;
+    stroke-dasharray: 3;
+}
+
+.chart-info {
+    height: 30px;
 }
 
 .overlay {

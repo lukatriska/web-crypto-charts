@@ -1,12 +1,12 @@
 let margin = {top: 10, right: 0, bottom: 0, left: 0},
-  width = 760 - margin.left - margin.right,
-  height = 500 - margin.top - margin.bottom;
+  width = 760,
+  height = 500;
 
-const svg = d3.select("body")
+const svg = d3.select(".main-container")
   .append("svg")
   .attr("class", "main-svg")
-  .attr("width", width + margin.left + margin.right)
-  .attr("height", height + margin.top + margin.bottom)
+  .attr("width", width)
+  .attr("height", height)
   .style("cursor", "crosshair")
   .append("g")
   .attr("transform",
@@ -26,8 +26,7 @@ d3.csv("https://api.coindesk.com/v1/bpi/historical/close.csv",
       .range([0, width]);
 
     let y = d3.scaleLinear()
-      .domain([0, d3.max(data, d => +d.value
-      )])
+      .domain([0, d3.max(data, d => +d.value)])
       .range([height, 0]);
 
     svg.append("path")
@@ -48,10 +47,10 @@ d3.csv("https://api.coindesk.com/v1/bpi/historical/close.csv",
       .attr('r', 4.5);
 
     focus.append('line')
-      .classed('x', true);
+      .classed('price-line x', true);
 
     focus.append('line')
-      .classed('y', true);
+      .classed('price-line y', true);
 
     focus.append('text')
       .attr('x', 9)
@@ -92,7 +91,7 @@ d3.csv("https://api.coindesk.com/v1/bpi/historical/close.csv",
       let mouse = d3.mouse(target);
 
       const x0 = getMousePosition(mouse);
-      const i = Math.floor((x0 / 760) * 34);
+      const i = Math.floor((x0 / 760) * data.length) - 1;
       const d0 = data[i - 1], d1 = data[i];
 
       const d = x0 - d0.date > d1.date - x0 ? d1 : d0;
@@ -111,7 +110,9 @@ d3.csv("https://api.coindesk.com/v1/bpi/historical/close.csv",
         .attr('y2', height - y(d.value));
 
       d3.select(".chart-info")
-        .text(getMousePosition(mouse))
+        .text(d.value)
+
+
     }
 
   });
