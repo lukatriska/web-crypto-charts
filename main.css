@@ -4,7 +4,7 @@ body {
 }
 
 .main-svg {
-    margin: 0 200px 200px 200px;
+    margin: 0 200px 0 200px;
 }
 
 .main-container {
@@ -27,13 +27,16 @@ body {
 }
 
 .chart-info {
-    height: 30px;
     display: flex;
     align-items: center;
     flex-direction: column;
     margin-bottom: 20px;
     font-size: 18px;
 }
+.chart-info__date {
+    height: 21px;
+}
+
 
 .axis {
     text-anchor: end;
