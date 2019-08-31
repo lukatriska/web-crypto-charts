@@ -32,7 +32,9 @@ body {
     flex-direction: column;
     margin-bottom: 20px;
     font-size: 18px;
+    height: 63px;
 }
+
 .chart-info__date {
     height: 21px;
 }
