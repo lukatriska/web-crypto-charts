@@ -1,8 +1,8 @@
-let margin = {top: 10, right: 90, bottom: 100, left: 80},
+let margin = {top: 10, right: 110, bottom: 100, left: 80},
   width = 760,
   height = 400;
 
-// converts a unix timestamp to date string
+// converts a Date object to date string
 const getDateString = (date) => `${date.getDate()} ${date.toLocaleString('default', {month: 'long'})} ${date.getFullYear()}`;
 
 
@@ -114,6 +114,14 @@ d3.csv("https://api.coindesk.com/v1/bpi/historical/close.csv",
       .attr("transform", `translate(${width},${height / 2})`)
       .classed('axis-right', true)
       .call(d3.axisRight(y_volume));
+    // appending the right y axis label
+    svg.append("text")
+      .attr("transform", "rotate(90)")
+      .attr("y", 0 - width - margin.right + 5)
+      .attr("x", 300)
+      .attr("dy", "1em")
+      .style("text-anchor", "middle")
+      .text("Volume per day, USD");
 
     // appending the volume bars at the bottom
     let x_volume = d3.scaleBand()
