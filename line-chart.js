@@ -5,6 +5,12 @@ let margin = {top: 10, right: 110, bottom: 100, left: 80},
 // converts a Date object to date string
 const getDateString = (date) => `${date.getDate()} ${date.toLocaleString('default', {month: 'long'})} ${date.getFullYear()}`;
 
+// returns a number with commas as thousand separators
+const numberWithCommas = (x) => {
+  let parts = x.toString().split(".");
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return parts.join(".");
+};
 
 const svg = d3.select(".main-container")
   .append("svg")
@@ -30,7 +36,7 @@ d3.csv("https://api.coindesk.com/v1/bpi/historical/close.csv",
       d3.select(".chart-info__date")
         .text("");
       d3.select(".chart-info__price")
-        .text(`Most recent price: $${data[data.length - 1].value}`);
+        .text(`Most recent price: $${numberWithCommas(data[data.length - 1].value)}`);
       d3.select(".chart-info__volume")
         .text("");
     };
@@ -208,9 +214,9 @@ d3.csv("https://api.coindesk.com/v1/bpi/historical/close.csv",
         d3.select(".chart-info__date")
           .text(`Date: ${d.date.getDate()} ${d.date.toLocaleString('default', {month: 'long'})} ${d.date.getFullYear()}`);
         d3.select(".chart-info__price")
-          .text(`Price: $${d.value}`);
+          .text(`Price: $${numberWithCommas(d.value)}`);
         d3.select(".chart-info__volume")
-          .text(`Volume: $${d.volume}`)
+          .text(`Volume: $${numberWithCommas(d.volume)}`)
       }
 
     }
