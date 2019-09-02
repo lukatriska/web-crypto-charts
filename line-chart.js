@@ -84,10 +84,11 @@ d3.csv("https://api.coindesk.com/v1/bpi/historical/close.csv",
 
     // appending the left y axis with price
     let y = d3.scaleLinear()
-      .domain([0, d3.max(data, d => d.value)])
+      .domain([d3.min(data, d => d.value) - d3.max(data, d => d.value) / 6, d3.max(data, d => d.value)])
       .range([height, 0]);
     svg.append("g")
       .classed('axis', true)
+      .attr("transform", `translate(0,0)`)
       .call(d3.axisLeft(y));
     // appending the left y axis label
     svg.append("text")
@@ -115,28 +116,27 @@ d3.csv("https://api.coindesk.com/v1/bpi/historical/close.csv",
       .domain([0, d3.max(data, d => {
         return +d.volume;
       })])
-      .range([height / 2, 0]);
+      .range([height / 3, 0]);
     svg.append("g")
-      .attr("transform", `translate(${width},${height / 2})`)
+      .attr("transform", `translate(${width},${height / 3 * 2})`)
       .classed('axis-right', true)
       .call(d3.axisRight(y_volume));
     // appending the right y axis label
     svg.append("text")
       .attr("transform", "rotate(90)")
       .attr("y", 0 - width - margin.right + 5)
-      .attr("x", 300)
+      .attr("x", 340)
       .attr("dy", "1em")
       .style("text-anchor", "middle")
       .text("Volume per day, USD");
 
     // appending the volume bars at the bottom
     let x_volume = d3.scaleBand()
-      .rangeRound([0, width])
+      .range([0, width])
       .domain(data.map(d => d.date))
-      .paddingInner(0)
-      .paddingOuter(0);
+      .paddingInner(0.1);
     svg.append("g")
-      .attr("transform", `translate(0, ${height / 2})`)
+      .attr("transform", `translate(0, ${height / 3 * 2})`)
       .selectAll("bar")
       .data(data)
       .enter().append("rect")
@@ -144,7 +144,7 @@ d3.csv("https://api.coindesk.com/v1/bpi/historical/close.csv",
       .attr("x", d => x_volume(d.date))
       .attr("width", x_volume.bandwidth())
       .attr("y", d => y_volume(d.volume))
-      .attr("height", d => height / 2 - y_volume(d.volume));
+      .attr("height", d => height / 3 - y_volume(d.volume));
 
     // creating the part of the tooltip that moves when you hover over the chart
     const focus = svg.append('g')
