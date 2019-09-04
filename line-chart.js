@@ -2,6 +2,9 @@ let margin = {top: 10, right: 110, bottom: 100, left: 80},
   width = 760,
   height = 400;
 
+let startDate, endDate = "";
+const baseUrl = "https://api.coindesk.com/v1/bpi/historical/close.csv";
+
 // converts a Date object to date string
 const getDateString = (date) => `${date.getDate()} ${date.toLocaleString('default', {month: 'long'})} ${date.getFullYear()}`;
 
@@ -19,10 +22,35 @@ const svg = d3.select(".main-container")
   .attr("height", height + margin.top + margin.bottom)
   .style("cursor", "crosshair")
   .append("g")
+  .classed("main-g", true)
   .attr("transform", `translate(${margin.left},${margin.top})`);
 
 
-d3.csv("https://api.coindesk.com/v1/bpi/historical/close.csv",
+// get current date
+let currDate = new Date();
+let currMonth = (currDate.getMonth() + 1).toString().length !== 2 ? `0${currDate.getMonth() + 1}` : currDate.getMonth() + 1;
+let currDay = (currDate.getDate()).toString().length !== 2 ? `0${(currDate.getDate())}` : (currDate.getDate());
+
+// define the default start date for the chart (30 days before today)
+let defaultStartDate = new Date();
+defaultStartDate.setDate(defaultStartDate.getDate() - 31);
+let defaultStartMonth = (defaultStartDate.getMonth() + 1).toString().length !== 2 ? `0${defaultStartDate.getMonth() + 1}` : defaultStartDate.getMonth() + 1;
+let defaultStartDay = (defaultStartDate.getDate()).toString().length !== 2 ? `0${(defaultStartDate.getDate())}` : (defaultStartDate.getDate());
+
+let endDateInput = document.getElementById("end-date");
+let startDateInput = document.getElementById("start-date");
+
+// set the maximum for end date input to today
+endDate = `${currDate.getFullYear()}-${currMonth}-${currDay}`;
+endDateInput.max = `${currDate.getFullYear()}-${currMonth}-${currDay}`;
+// set the value for end date input for today
+endDateInput.value = `${currDate.getFullYear()}-${currMonth}-${currDay}`;
+// set the value for the start date for 30 days before today
+startDate = `${defaultStartDate.getFullYear()}-${defaultStartMonth}-${defaultStartDay}`;
+startDateInput.value = `${defaultStartDate.getFullYear()}-${defaultStartMonth}-${defaultStartDay}`;
+
+
+const drawChart = (url) => d3.csv(url,
 
   d => {
     return {date: d3.timeParse("%Y-%m-%d")(d.Date), value: Math.floor(d.Close), volume: Math.floor(d.volume)}
@@ -30,6 +58,10 @@ d3.csv("https://api.coindesk.com/v1/bpi/historical/close.csv",
 
 
   data => {
+
+    // delete the previous chart, if any
+    d3.select(".main-g")
+      .html("");
 
     // quick function to show the most recent info in the info-box at the top
     const showMostRecentInfo = () => {
@@ -41,7 +73,6 @@ d3.csv("https://api.coindesk.com/v1/bpi/historical/close.csv",
         .text("");
     };
 
-
     let volume_url = "https://min-api.cryptocompare.com/data/exchange/histoday?tsym=USD&api_key=86cf65ef09473df5964e859710cbccbb0c12284cd4e5493023133a9f5035429f";
 
     // getting the volume data
@@ -52,15 +83,15 @@ d3.csv("https://api.coindesk.com/v1/bpi/historical/close.csv",
 
     data.splice(data.length - 3, 3);
 
-    for (let i = 0; i < data.length; i++) {
-      for (let j = 0; j < volume_data.length; j++) {
-        let volume_data_date = new Date(new Date(volume_data[j]["time"] * 1e3).toISOString());
-
-        if (getDateString(data[i].date) === getDateString(volume_data_date)) {
-          data[i].volume = Math.floor(volume_data[j]["volume"]);
-        }
-      }
-    }
+    // for (let i = 0; i < data.length; i++) {
+    //   for (let j = 0; j < volume_data.length; j++) {
+    //     let volume_data_date = new Date(new Date(volume_data[j]["time"] * 1e3).toISOString());
+    //
+    //     if (getDateString(data[i].date) === getDateString(volume_data_date)) {
+    //       data[i].volume = Math.floor(volume_data[j]["volume"]);
+    //     }
+    //   }
+    // }
 
 
     showMostRecentInfo();
@@ -222,3 +253,20 @@ d3.csv("https://api.coindesk.com/v1/bpi/historical/close.csv",
     }
 
   });
+
+// draw the initial 30-day chart
+drawChart(baseUrl);
+
+// listen for changes in start date input
+startDateInput.addEventListener("change", e => {
+  let dateArr = e.target.value.split('-');
+  if (dateArr.length > 1) startDate = `${dateArr[0]}-${dateArr[1]}-${dateArr[2]}`;
+  if (startDate && endDate) drawChart(`${baseUrl}?start=${startDate}&end=${endDate}`);
+});
+
+// listen for changes in end date input
+endDateInput.addEventListener("change", e => {
+  let dateArr = e.target.value.split('-');
+  if (dateArr.length > 1) endDate = `${dateArr[0]}-${dateArr[1]}-${dateArr[2]}`;
+  if (startDate && endDate) drawChart(`${baseUrl}?start=${startDate}&end=${endDate}`);
+});
