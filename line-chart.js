@@ -4,9 +4,7 @@ let margin = {top: 10, right: 110, bottom: 100, left: 80},
 
 let startDate, endDate = "";
 const baseUrl = "https://api.coindesk.com/v1/bpi/historical/close.csv";
-
-// converts a Date object to date string
-const getDateString = (date) => `${date.getDate()} ${date.toLocaleString('default', {month: 'long'})} ${date.getFullYear()}`;
+const volume_url = "https://min-api.cryptocompare.com/data/exchange/histoday?tsym=USD&limit=2000&&api_key=86cf65ef09473df5964e859710cbccbb0c12284cd4e5493023133a9f5035429f";
 
 // returns a number with commas as thousand separators
 const numberWithCommas = (x) => {
@@ -15,6 +13,7 @@ const numberWithCommas = (x) => {
   return parts.join(".");
 };
 
+// create the main svg
 const svg = d3.select(".main-container")
   .append("svg")
   .attr("class", "main-svg")
@@ -50,6 +49,15 @@ startDate = `${defaultStartDate.getFullYear()}-${defaultStartMonth}-${defaultSta
 startDateInput.value = `${defaultStartDate.getFullYear()}-${defaultStartMonth}-${defaultStartDay}`;
 
 
+// getting the volume data
+let xhReq = new XMLHttpRequest();
+xhReq.open("GET", volume_url, false);
+xhReq.send(null);
+let volume_data = JSON.parse(xhReq.responseText)["Data"];
+
+// convert Unix timestamps to Date objects in the volume data
+for (let i = 0; i < volume_data.length; i++) volume_data[i]["time"] = new Date(volume_data[i]["time"] * 1e3);
+
 const drawChart = (url) => d3.csv(url,
 
   d => {
@@ -58,6 +66,13 @@ const drawChart = (url) => d3.csv(url,
 
 
   data => {
+
+    // remove the redundant 3 messages at the end of data
+    data.splice(data.length - 3, 3);
+
+    // configure the volume data array to the range picked by user
+    let daysToShow = (d3.max(data, d => d.date).getTime() - d3.min(data, d => d.date).getTime()) / 86400000 + 1;
+    let currVolumeData = volume_data.splice(volume_data.length - daysToShow, daysToShow);
 
     // delete the previous chart, if any
     d3.select(".main-g")
@@ -73,27 +88,7 @@ const drawChart = (url) => d3.csv(url,
         .text("");
     };
 
-    let volume_url = "https://min-api.cryptocompare.com/data/exchange/histoday?tsym=USD&api_key=86cf65ef09473df5964e859710cbccbb0c12284cd4e5493023133a9f5035429f";
-
-    // getting the volume data
-    let xhReq = new XMLHttpRequest();
-    xhReq.open("GET", volume_url, false);
-    xhReq.send(null);
-    let volume_data = JSON.parse(xhReq.responseText)["Data"];
-
-    data.splice(data.length - 3, 3);
-
-    // for (let i = 0; i < data.length; i++) {
-    //   for (let j = 0; j < volume_data.length; j++) {
-    //     let volume_data_date = new Date(new Date(volume_data[j]["time"] * 1e3).toISOString());
-    //
-    //     if (getDateString(data[i].date) === getDateString(volume_data_date)) {
-    //       data[i].volume = Math.floor(volume_data[j]["volume"]);
-    //     }
-    //   }
-    // }
-
-
+    // show most recent info after the page loads
     showMostRecentInfo();
 
     // appending the bottom x axis with dates
@@ -144,7 +139,7 @@ const drawChart = (url) => d3.csv(url,
 
     // appending the right y axis with volume
     let y_volume = d3.scaleLinear()
-      .domain([0, d3.max(data, d => {
+      .domain([0, d3.max(currVolumeData, d => {
         return +d.volume;
       })])
       .range([height / 3, 0]);
@@ -164,15 +159,15 @@ const drawChart = (url) => d3.csv(url,
     // appending the volume bars at the bottom
     let x_volume = d3.scaleBand()
       .range([0, width])
-      .domain(data.map(d => d.date))
+      .domain(currVolumeData.map(d => d.time))
       .paddingInner(0.1);
     svg.append("g")
       .attr("transform", `translate(0, ${height / 3 * 2})`)
       .selectAll("bar")
-      .data(data)
+      .data(currVolumeData)
       .enter().append("rect")
       .style("fill", "steelblue")
-      .attr("x", d => x_volume(d.date))
+      .attr("x", d => x_volume(d.time))
       .attr("width", x_volume.bandwidth())
       .attr("y", d => y_volume(d.volume))
       .attr("height", d => height / 3 - y_volume(d.volume));
@@ -201,6 +196,7 @@ const drawChart = (url) => d3.csv(url,
       .attr('x', 9)
       .attr('dy', '.35em');
 
+    // create an overlay rectangle which we use to see if a mouse is hovering over the chart
     svg.append('rect')
       .attr('class', 'overlay')
       .attr('width', width)
@@ -233,6 +229,7 @@ const drawChart = (url) => d3.csv(url,
 
       // choose day using the x coordinate of the cursor
       const d = data[Math.floor((Math.floor(bound(mouse[0], 0, width)) / 761) * data.length)];
+      const vD = currVolumeData[Math.floor((Math.floor(bound(mouse[0], 0, width)) / 761) * currVolumeData.length)];
 
       focus.attr('transform', `translate(${x(d.date)}, ${y(d.value)})`);
       focus.select('line.x')
@@ -247,7 +244,7 @@ const drawChart = (url) => d3.csv(url,
         d3.select(".chart-info__price")
           .text(`Price: $${numberWithCommas(d.value)}`);
         d3.select(".chart-info__volume")
-          .text(`Volume: $${numberWithCommas(d.volume)}`)
+          .text(`Volume: $${numberWithCommas(vD.volume)}`)
       }
 
     }
