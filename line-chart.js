@@ -45,12 +45,16 @@ if (!localStorage.getItem("startDate")) {
   // set the value for the start date for 30 days before today
   startDate = `${defaultStartDate.getFullYear()}-${defaultStartMonth}-${defaultStartDay}`;
   startDateInput.value = `${defaultStartDate.getFullYear()}-${defaultStartMonth}-${defaultStartDay}`;
+} else {
+  startDate = localStorage.getItem("startDate");
 }
 
 if (!localStorage.getItem("endDate")) {
   endDate = `${currDate.getFullYear()}-${currMonth}-${currDay}`;
   // set the value for end date input for today
   endDateInput.value = `${currDate.getFullYear()}-${currMonth}-${currDay}`;
+} else {
+  endDate = localStorage.getItem("endDate");
 }
 
 endDateInput.max = `${currDate.getFullYear()}-${currMonth}-${currDay}`;
@@ -174,6 +178,7 @@ const drawChart = (url) => d3.csv(url,
       .paddingInner(0.1);
     svg.append("g")
       .attr("transform", `translate(0, ${height / 3 * 2})`)
+      .attr("opacity", 0.7)
       .selectAll("bar")
       .data(currVolumeData)
       .enter().append("rect")
@@ -215,7 +220,7 @@ const drawChart = (url) => d3.csv(url,
       .on('mouseover', () => focus.style('display', null))
       .on('mouseout', () => {
         showMostRecentInfo();
-        return focus.style('display', 'none');
+        focus.style('display', 'none');
       })
       .on('mousemove', mouseAction());
 
@@ -283,7 +288,7 @@ startDateInput.addEventListener("change", e => {
     startDate = dateArr[0] >= 2015 ? `${dateArr[0]}-${dateArr[1]}-${dateArr[2]}` : null;
     localStorage.setItem("startDate", startDate);
   }
-  if (startDate && endDate) drawChart(`${baseUrl}?start=${startDate}&end=${endDate}`);
+  drawChart(`${baseUrl}?start=${startDate}&end=${endDate}`);
 });
 
 // listen for changes in end date input
@@ -293,5 +298,5 @@ endDateInput.addEventListener("change", e => {
     endDate = `${dateArr[0]}-${dateArr[1]}-${dateArr[2]}`;
     localStorage.setItem("endDate", endDate);
   }
-  if (startDate && endDate) drawChart(`${baseUrl}?start=${startDate}&end=${endDate}`);
+  drawChart(`${baseUrl}?start=${startDate}&end=${endDate}`);
 });
