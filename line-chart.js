@@ -1,6 +1,6 @@
 let margin = {top: 10, right: 110, bottom: 100, left: 80},
-  width = 760,
-  height = 400;
+  width = 1080,
+  height = 720;
 
 let startDate, endDate = "";
 const baseUrl = "https://api.coindesk.com/v1/bpi/historical/close.csv";
@@ -47,6 +47,7 @@ endDateInput.value = `${currDate.getFullYear()}-${currMonth}-${currDay}`;
 // set the value for the start date for 30 days before today
 startDate = `${defaultStartDate.getFullYear()}-${defaultStartMonth}-${defaultStartDay}`;
 startDateInput.value = `${defaultStartDate.getFullYear()}-${defaultStartMonth}-${defaultStartDay}`;
+startDateInput.min = "2015-01-01";
 
 
 // getting the volume data
@@ -56,7 +57,11 @@ xhReq.send(null);
 let volume_data = JSON.parse(xhReq.responseText)["Data"];
 
 // convert Unix timestamps to Date objects in the volume data
-for (let i = 0; i < volume_data.length; i++) volume_data[i]["time"] = new Date(volume_data[i]["time"] * 1e3);
+for (let i = 0; i < volume_data.length; i++) {
+  volume_data[i]["time"] = new Date(volume_data[i]["time"] * 1e3);
+  // replace the huge numbers that sometimes appear in the data with the mean
+  volume_data[i]["volume"] = (volume_data[i]["volume"] > 61211656445 ? 3481431966 : volume_data[i]["volume"])
+}
 
 const drawChart = (url) => d3.csv(url,
 
@@ -71,8 +76,8 @@ const drawChart = (url) => d3.csv(url,
     data.splice(data.length - 3, 3);
 
     // configure the volume data array to the range picked by user
-    let daysToShow = (d3.max(data, d => d.date).getTime() - d3.min(data, d => d.date).getTime()) / 86400000 + 1;
-    let currVolumeData = volume_data.splice(volume_data.length - daysToShow, daysToShow);
+    let daysToShow = Math.floor((d3.max(data, d => d.date).getTime() - d3.min(data, d => d.date).getTime()) / 86400000 + 1);
+    let currVolumeData = volume_data.slice(volume_data.length - daysToShow);
 
     // delete the previous chart, if any
     d3.select(".main-g")
@@ -139,9 +144,7 @@ const drawChart = (url) => d3.csv(url,
 
     // appending the right y axis with volume
     let y_volume = d3.scaleLinear()
-      .domain([0, d3.max(currVolumeData, d => {
-        return +d.volume;
-      })])
+      .domain([0, d3.max(currVolumeData, d => +d.volume)])
       .range([height / 3, 0]);
     svg.append("g")
       .attr("transform", `translate(${width},${height / 3 * 2})`)
@@ -151,7 +154,7 @@ const drawChart = (url) => d3.csv(url,
     svg.append("text")
       .attr("transform", "rotate(90)")
       .attr("y", 0 - width - margin.right + 5)
-      .attr("x", 340)
+      .attr("x", height - margin.bottom - margin.top)
       .attr("dy", "1em")
       .style("text-anchor", "middle")
       .text("Volume per day, USD");
@@ -228,8 +231,8 @@ const drawChart = (url) => d3.csv(url,
       let mouse = d3.mouse(target);
 
       // choose day using the x coordinate of the cursor
-      const d = data[Math.floor((Math.floor(bound(mouse[0], 0, width)) / 761) * data.length)];
-      const vD = currVolumeData[Math.floor((Math.floor(bound(mouse[0], 0, width)) / 761) * currVolumeData.length)];
+      const d = data[Math.floor((Math.floor(bound(mouse[0], 0, width)) / (width + 1)) * data.length)];
+      const vD = currVolumeData[Math.floor((Math.floor(bound(mouse[0], 0, width)) / (width + 1)) * currVolumeData.length)];
 
       focus.attr('transform', `translate(${x(d.date)}, ${y(d.value)})`);
       focus.select('line.x')
@@ -257,7 +260,7 @@ drawChart(baseUrl);
 // listen for changes in start date input
 startDateInput.addEventListener("change", e => {
   let dateArr = e.target.value.split('-');
-  if (dateArr.length > 1) startDate = `${dateArr[0]}-${dateArr[1]}-${dateArr[2]}`;
+  if (dateArr.length > 1) startDate = dateArr[0] >= 2015 ? `${dateArr[0]}-${dateArr[1]}-${dateArr[2]}` : None;
   if (startDate && endDate) drawChart(`${baseUrl}?start=${startDate}&end=${endDate}`);
 });
 
