@@ -7,6 +7,23 @@ body {
     margin: 0 200px 0 200px;
 }
 
+.main-heading {
+    margin: 0;
+}
+
+.date-picker {
+    display: flex;
+    margin-top: 10px;
+}
+
+.start-date {
+    margin-left: 20px;
+}
+
+.end-date {
+    margin-left: 20px;
+}
+
 .main-container {
     display: flex;
     flex-direction: column;
@@ -29,9 +46,14 @@ body {
 .chart-info {
     display: flex;
     align-items: center;
-    flex-direction: column;
     font-size: 18px;
-    height: 63px;
+    width: 1000px;
+    justify-content: space-evenly;
+    margin-top: 10px;
+}
+
+.data-availability-text {
+    margin: 0;
 }
 
 .chart-info__date {

@@ -1,6 +1,6 @@
 let margin = {top: 10, right: 110, bottom: 100, left: 80},
   width = 1080,
-  height = 720;
+  height = 700;
 
 let startDate, endDate = "";
 const baseUrl = "https://api.coindesk.com/v1/bpi/historical/close.csv";
