@@ -8,4 +8,3 @@
 - [X] add the ability to see volume (decided not to add ability to see market capitalisation of BTC, because it almost completely depends on the current price of BTC, so the graphs would be almost identical)
 - [X] add the ability to choose the date range for which to show the price
 - [ ] add a drop-down list, where one would be able to choose three other currencies to visualise: ETH, BNB and XRP, if there is access to such data
-- [ ] add a tool tip, which moves as you hover over the chart, and shows the price for a certain date (and volume and marketcap, if there is access to such data)
