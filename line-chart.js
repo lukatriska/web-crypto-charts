@@ -6,6 +6,12 @@ let startDate, endDate = "";
 const baseUrl = "https://api.coindesk.com/v1/bpi/historical/close.csv";
 const volume_url = "https://min-api.cryptocompare.com/data/exchange/histoday?tsym=USD&limit=2000&&api_key=86cf65ef09473df5964e859710cbccbb0c12284cd4e5493023133a9f5035429f";
 
+let endDateInput = document.getElementById("end-date");
+
+let startDateInput = document.getElementById("start-date");
+startDateInput.min = "2015-01-01";
+
+
 // returns a number with commas as thousand separators
 const numberWithCommas = (x) => {
   let parts = x.toString().split(".");
@@ -24,30 +30,30 @@ const svg = d3.select(".main-container")
   .classed("main-g", true)
   .attr("transform", `translate(${margin.left},${margin.top})`);
 
-
 // get current date
 let currDate = new Date();
 let currMonth = (currDate.getMonth() + 1).toString().length !== 2 ? `0${currDate.getMonth() + 1}` : currDate.getMonth() + 1;
 let currDay = (currDate.getDate()).toString().length !== 2 ? `0${(currDate.getDate())}` : (currDate.getDate());
 
-// define the default start date for the chart (30 days before today)
-let defaultStartDate = new Date();
-defaultStartDate.setDate(defaultStartDate.getDate() - 31);
-let defaultStartMonth = (defaultStartDate.getMonth() + 1).toString().length !== 2 ? `0${defaultStartDate.getMonth() + 1}` : defaultStartDate.getMonth() + 1;
-let defaultStartDay = (defaultStartDate.getDate()).toString().length !== 2 ? `0${(defaultStartDate.getDate())}` : (defaultStartDate.getDate());
+if (!localStorage.getItem("startDate")) {
+  // define the default start date for the chart (30 days before today)
+  let defaultStartDate = new Date();
+  defaultStartDate.setDate(defaultStartDate.getDate() - 31);
+  let defaultStartMonth = (defaultStartDate.getMonth() + 1).toString().length !== 2 ? `0${defaultStartDate.getMonth() + 1}` : defaultStartDate.getMonth() + 1;
+  let defaultStartDay = (defaultStartDate.getDate()).toString().length !== 2 ? `0${(defaultStartDate.getDate())}` : (defaultStartDate.getDate());
 
-let endDateInput = document.getElementById("end-date");
-let startDateInput = document.getElementById("start-date");
+  // set the value for the start date for 30 days before today
+  startDate = `${defaultStartDate.getFullYear()}-${defaultStartMonth}-${defaultStartDay}`;
+  startDateInput.value = `${defaultStartDate.getFullYear()}-${defaultStartMonth}-${defaultStartDay}`;
+}
 
-// set the maximum for end date input to today
-endDate = `${currDate.getFullYear()}-${currMonth}-${currDay}`;
+if (!localStorage.getItem("endDate")) {
+  endDate = `${currDate.getFullYear()}-${currMonth}-${currDay}`;
+  // set the value for end date input for today
+  endDateInput.value = `${currDate.getFullYear()}-${currMonth}-${currDay}`;
+}
+
 endDateInput.max = `${currDate.getFullYear()}-${currMonth}-${currDay}`;
-// set the value for end date input for today
-endDateInput.value = `${currDate.getFullYear()}-${currMonth}-${currDay}`;
-// set the value for the start date for 30 days before today
-startDate = `${defaultStartDate.getFullYear()}-${defaultStartMonth}-${defaultStartDay}`;
-startDateInput.value = `${defaultStartDate.getFullYear()}-${defaultStartMonth}-${defaultStartDay}`;
-startDateInput.min = "2015-01-01";
 
 
 // getting the volume data
@@ -71,6 +77,8 @@ const drawChart = (url) => d3.csv(url,
 
 
   data => {
+
+    console.log(url);
 
     // remove the redundant 3 messages at the end of data
     data.splice(data.length - 3, 3);
@@ -255,18 +263,35 @@ const drawChart = (url) => d3.csv(url,
   });
 
 // draw the initial 30-day chart
-drawChart(baseUrl);
+localStorage.getItem("startDate") && localStorage.getItem("endDate") ?
+  drawChart(`${baseUrl}?start=${localStorage.getItem("startDate")}&end=${localStorage.getItem("endDate")}`) : drawChart(baseUrl);
+
+if (localStorage.getItem("startDate") && !localStorage.getItem("endDate")) {
+  drawChart(`${baseUrl}?start=${localStorage.getItem("startDate")}&end=${endDate}`);
+}
+
+if (!localStorage.getItem("startDate") && localStorage.getItem("endDate")) {
+  drawChart(`${baseUrl}?start=${startDate}&end=${localStorage.getItem("endDate")}`);
+}
+
+console.log(localStorage.getItem("startDate"));
 
 // listen for changes in start date input
 startDateInput.addEventListener("change", e => {
   let dateArr = e.target.value.split('-');
-  if (dateArr.length > 1) startDate = dateArr[0] >= 2015 ? `${dateArr[0]}-${dateArr[1]}-${dateArr[2]}` : null;
+  if (dateArr.length > 1) {
+    startDate = dateArr[0] >= 2015 ? `${dateArr[0]}-${dateArr[1]}-${dateArr[2]}` : null;
+    localStorage.setItem("startDate", startDate);
+  }
   if (startDate && endDate) drawChart(`${baseUrl}?start=${startDate}&end=${endDate}`);
 });
 
 // listen for changes in end date input
 endDateInput.addEventListener("change", e => {
   let dateArr = e.target.value.split('-');
-  if (dateArr.length > 1) endDate = `${dateArr[0]}-${dateArr[1]}-${dateArr[2]}`;
+  if (dateArr.length > 1) {
+    endDate = `${dateArr[0]}-${dateArr[1]}-${dateArr[2]}`;
+    localStorage.setItem("endDate", endDate);
+  }
   if (startDate && endDate) drawChart(`${baseUrl}?start=${startDate}&end=${endDate}`);
 });
