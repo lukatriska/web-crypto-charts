@@ -43,28 +43,34 @@ body {
     stroke: #7D95B6
 }
 
-.chart-info {
-    display: flex;
-    align-items: center;
-    font-size: 18px;
-    width: 1000px;
-    justify-content: space-evenly;
-    margin-top: 10px;
-}
-
 .data-availability-text {
     margin: 0;
 }
 
-.chart-info__date {
-    height: 21px;
+.chart-info {
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+    width: 730px;
+    justify-content: space-evenly;
+    margin-top: 10px;
 }
 
+.chart-info__date {
+    width: 210px;
+}
+
+.chart-info__price {
+    width: 215px;
+    margin-left: 60px;
+}
+
+.chart-info__volume {
+    width: 240px;
+}
 
 .axis {
     text-anchor: end;
-    font-family: Oxygen, sans-serif;
-    color: #64b5f6;
 }
 
 .overlay {

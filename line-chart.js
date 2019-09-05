@@ -260,7 +260,7 @@ drawChart(baseUrl);
 // listen for changes in start date input
 startDateInput.addEventListener("change", e => {
   let dateArr = e.target.value.split('-');
-  if (dateArr.length > 1) startDate = dateArr[0] >= 2015 ? `${dateArr[0]}-${dateArr[1]}-${dateArr[2]}` : None;
+  if (dateArr.length > 1) startDate = dateArr[0] >= 2015 ? `${dateArr[0]}-${dateArr[1]}-${dateArr[2]}` : null;
   if (startDate && endDate) drawChart(`${baseUrl}?start=${startDate}&end=${endDate}`);
 });
 
