@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>D3.js BTC Chart</title>
+
+</head>
+<body>
+
+<div class="main-container">
+    <h1 class="main-heading">BTC Price and volume chart</h1>
+    <div class="date-picker">
+        <p class="data-availability-text">Data available from January 1st 2015</p>
+        <div class="start-date">
+            <label for="start-date">
+                Start date:
+            </label>
+            <input type="date" id="start-date" name="start-date" min="2013-09-01">
+        </div>
+        <div class="end-date">
+            <label for="end-date">
+                End date:
+            </label>
+            <input type="date" id="end-date" name="start-date" max="">
+        </div>
+    </div>
+    <div class="chart-info">
+        <div class="chart-info__date"></div>
+        <div class="chart-info__price"></div>
+        <div class="chart-info__volume"></div>
+    </div>
+</div>
+
+<script src="bundle.js"></script>
+
+</body>
+</html>
+
