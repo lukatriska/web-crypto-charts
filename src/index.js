@@ -3,7 +3,7 @@ import * as d3 from "d3";
 
 let margin = {top: 10, right: 110, bottom: 100, left: 80},
   width = 1080,
-  height = 700;
+  height = 600;
 
 let startDate, endDate = "";
 const baseUrl = "https://api.coindesk.com/v1/bpi/historical/close.json";
@@ -84,11 +84,11 @@ const drawChart = response => {
 
   for (let item in response.bpi) data.push({
     date: d3.timeParse("%Y-%m-%d")(item),
-    value: Math.floor(response.bpi[item])
+    value: parseInt(Math.floor(response.bpi[item]))
   });
 
   // configure the volume data array to the range picked by user
-  let daysToShow = Math.floor((d3.max(data, d => d.date).getTime() - d3.min(data, d => d.date).getTime()) / 86400000 + 1);
+  let daysToShow = parseInt(Math.floor((d3.max(data, d => d.date).getTime() - d3.min(data, d => d.date).getTime()) / 86400000 + 1));
   let currVolumeData = volumeData.slice(volumeData.length - daysToShow);
 
   // delete the previous chart, if any
@@ -244,8 +244,8 @@ const drawChart = response => {
     let mouse = d3.mouse(target);
 
     // choose day using the x coordinate of the cursor
-    const d = data[Math.floor((Math.floor(bound(mouse[0], 0, width)) / (width + 1)) * data.length)];
-    const vD = currVolumeData[Math.floor((Math.floor(bound(mouse[0], 0, width)) / (width + 1)) * currVolumeData.length)];
+    const d = data[parseInt(Math.floor((parseInt(Math.floor(bound(mouse[0], 0, width))) / (width + 1)) * data.length))];
+    const vD = currVolumeData[parseInt(Math.floor((parseInt(Math.floor(bound(mouse[0], 0, width))) / (width + 1)) * currVolumeData.length))];
 
     focus.attr('transform', `translate(${x(d.date)}, ${y(d.value)})`);
     focus.select('line.x')
