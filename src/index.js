@@ -1,3 +1,4 @@
+import './style.css';
 import * as d3 from "d3";
 
 let margin = {top: 10, right: 110, bottom: 100, left: 80},
