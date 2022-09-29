@@ -4,7 +4,7 @@
   "private": true,
   "homepage": "https://lukatriska.github.io/web-crypto-charts/",
   "dependencies": {
-    "d3": "^5.11.0"
+    "d3": "^7.6.1"
   },
   "devDependencies": {
     "css-loader": "^3.2.0",
